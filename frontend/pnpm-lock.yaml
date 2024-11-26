@@ -11,6 +11,9 @@ importers:
       '@fluentui/react-components':
         specifier: ^9.56.2
         version: 9.56.2(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(scheduler@0.23.2)
+      '@fluentui/react-icons':
+        specifier: ^2.0.266
+        version: 2.0.266(react@18.3.1)
       react:
         specifier: ^18.2.0
         version: 18.3.1
