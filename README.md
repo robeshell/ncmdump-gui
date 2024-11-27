@@ -1,19 +1,13 @@
-# README
+# ncmdump-gui
 
-## About
+## 介绍
 
-This is the official Wails React-TS template.
+ncmdump-gui 基于 [ncmdump-go](https://git.taurusxin.com/taurusxin/ncmdump-go) 开发，是一个图形化的 ncmdump 工具。
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+![工具主界面](https://git.taurusxin.com/taurusxin/ncmdump-gui/raw/branch/main/img/ncmdump-gui.png)
 
-## Live Development
+使用简单，支持 go 协程，高速并行解析并处理多个 ncm 文件，多个文件瞬间完成，支持自定义输出路径。
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+## 下载
 
-## Building
-
-To build a redistributable, production mode package, use `wails build`.
+前往[Releases](https://git.taurusxin.com/taurusxin/ncmdump-gui/releases)下载最新版本。
