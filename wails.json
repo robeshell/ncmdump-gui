@@ -9,5 +9,12 @@
   "author": {
     "name": "TaurusXin",
     "email": "i@taurusxin.com"
+  },
+  "info": {
+    "companyName": "TaurusXin",
+    "productName": "ncmdump-gui",
+    "productVersion": "1.0.1",
+    "copyright": "Copyright © 2025 TaurusXin",
+    "comments": "Convert ncm to mp3/flac"
   }
 }
