@@ -74,6 +74,8 @@ const useStyles = makeStyles({
   },
 })
 
+let loaded = false
+
 export const App = () => {
   const styles = useStyles()
 
@@ -199,17 +201,19 @@ export const App = () => {
       })
     })
     Load().then(res => {
-      console.log(res)
       setSaveTo(res.save_to as SaveTo)
       setSavePath(res.path)
+      loaded = true
     })
   }, [])
 
   useEffect(() => {
-    Save({
-      save_to: saveTo,
-      path: savePath,
-    }).then(_ => {})
+    if (loaded) {
+      Save({
+        save_to: saveTo,
+        path: savePath,
+      }).then(_ => {})
+    }
   }, [saveTo, savePath])
 
   OnFileDrop((_x, _y, paths) => {
