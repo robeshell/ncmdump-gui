@@ -6,6 +6,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 
 	"git.taurusxin.com/taurusxin/ncmdump-gui/utils"
 )
@@ -37,8 +38,14 @@ func main() {
 			config_manager,
 		},
 		DragAndDrop: &options.DragAndDrop{
-			EnableFileDrop: true,
+			EnableFileDrop:     true,
 			DisableWebViewDrop: true,
+		},
+		Mac: &mac.Options{
+			About: &mac.AboutInfo{
+				Title:   "ncmdump-gui",
+				Message: "Copyright © 2025 TaurusXin",
+			},
 		},
 	})
 
