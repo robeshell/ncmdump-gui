@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useState } from 'react'
 import {
   Button,
@@ -35,6 +35,10 @@ import {
   CheckmarkRegular,
   DismissRegular,
   DocumentArrowRightRegular,
+  DocumentAddRegular,
+  DeleteRegular,
+  DeleteDismissRegular,
+  WindowPlayRegular,
 } from '@fluentui/react-icons'
 
 import { Status, Item, SaveTo } from './types'
@@ -50,6 +54,10 @@ const columnsDef: TableColumnDefinition<Item>[] = [
   createTableColumn<Item>({
     columnId: 'file',
     renderHeaderCell: () => <>文件</>,
+  }),
+  createTableColumn<Item>({
+    columnId: 'operation',
+    renderHeaderCell: () => <>操作</>,
   }),
 ]
 
@@ -69,10 +77,13 @@ export const App = () => {
   const styles = useStyles()
 
   const [items, setItems] = useState<Item[]>([])
-  const [isProcessing, setIsProcessing] = useState(false)
+  const isProcessing = useMemo(() => {
+    return items.some(item => item.status === 'processing')
+  }, [items])
 
-  const [totalFilesNeedToProcess, setTotalFilesNeedToProcess] = useState(0)
-  const [finishedCount, setFinishedCount] = useState(0)
+  const isProcessFinished = useMemo(() => {
+    return items.every(item => item.status === 'done' || item.status === 'error')
+  }, [items])
 
   const [saveTo, setSaveTo] = useState<SaveTo>('original')
   const [savePath, setSavePath] = useState('')
@@ -87,8 +98,12 @@ export const App = () => {
       minWidth: 100,
     },
     file: {
-      idealWidth: 150,
+      idealWidth: 1000,
       minWidth: 150,
+    },
+    operation: {
+      idealWidth: 80,
+      minWidth: 80,
     },
   })
 
@@ -135,7 +150,6 @@ export const App = () => {
       for (const file of files) {
         setItems(prev => [...prev, { file, status: 'pending' }])
       }
-      setTotalFilesNeedToProcess(prev => prev + files.length)
     })
   }
 
@@ -162,7 +176,6 @@ export const App = () => {
       showDialog('当前文件列表已全部处理完毕，请重新添加新的文件。')
       return
     }
-    setIsProcessing(true)
     const ncmFiles: main.NcmFile[] = []
     items.forEach(item => {
       ncmFiles.push({
@@ -175,9 +188,6 @@ export const App = () => {
 
   useEffect(() => {
     EventsOn('file-status-changed', (index: number, status: Status) => {
-      if (status == 'done' || status === 'error') {
-        setFinishedCount(prev => prev + 1)
-      }
       setItems(prev => {
         const newItems = [...prev]
         newItems[index].status = status
@@ -186,20 +196,16 @@ export const App = () => {
     })
   }, [])
 
-  useEffect(() => {
-    if (finishedCount === totalFilesNeedToProcess) {
-      setFinishedCount(0)
-      setTotalFilesNeedToProcess(0)
-      setIsProcessing(false)
-    }
-  }, [finishedCount])
-
   OnFileDrop((_x, _y, paths) => {
+    let length = paths.length
     for (const path of paths) {
+      // only end with ncm
+      if (!path.endsWith('.ncm')) {
+        length--
+        continue
+      }
       setItems(prev => [...prev, { file: path, status: 'pending' }])
     }
-    console.log(paths.length, paths)
-    setTotalFilesNeedToProcess(prev => prev + paths.length)
   }, false)
 
   return (
@@ -225,10 +231,15 @@ export const App = () => {
         </DialogSurface>
       </Dialog>
       <div className="flex space-between gap-3">
-        <Button onClick={selectFiles}>添加文件</Button>
-        <Button onClick={() => setItems([])}>清除列表</Button>
+        <Button onClick={selectFiles} icon={<DocumentAddRegular />}>
+          添加文件
+        </Button>
+        <Button onClick={() => setItems([])} icon={<DeleteDismissRegular />}>
+          清除列表
+        </Button>
         <Button
           appearance="primary"
+          icon={<WindowPlayRegular />}
           onClick={() => {
             startProcess()
           }}
@@ -297,6 +308,18 @@ export const App = () => {
                 </TableCellLayout>
               </TableCell>
               <TableCell>{file.file}</TableCell>
+              <TableCell>
+                <Button
+                  size="small"
+                  icon={<DeleteRegular />}
+                  appearance="transparent"
+                  onClick={() => {
+                    setItems(prev => prev.filter((_, i) => i !== index))
+                  }}
+                >
+                  移除
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
