@@ -1,5 +1,5 @@
-git.taurusxin.com/taurusxin/ncmdump-go v1.7.3 h1:UbaWVqWpCHJxle2ud631TzNavhSi7cuwu6+MudG3/tQ=
-git.taurusxin.com/taurusxin/ncmdump-go v1.7.3/go.mod h1:6kRSwUFM9BZwvDrg6MEPBn+29+Q2131QjK/URWO7seg=
+git.taurusxin.com/taurusxin/ncmdump-go v1.7.4 h1:Uk7tP58yNMOMqH1e9+BOFwwQ/lqScK3F10mAIFB/jtM=
+git.taurusxin.com/taurusxin/ncmdump-go v1.7.4/go.mod h1:6kRSwUFM9BZwvDrg6MEPBn+29+Q2131QjK/URWO7seg=
 github.com/TwiN/go-color v1.4.1 h1:mqG0P/KBgHKVqmtL5ye7K0/Gr4l6hTksPgTgMk3mUzc=
 github.com/TwiN/go-color v1.4.1/go.mod h1:WcPf/jtiW95WBIsEeY1Lc/b8aaWoiqQpu5cf8WFxu+s=
 github.com/bep/debounce v1.2.1 h1:v67fRdBA9UQu2NhLFXrSg0Brw7CexQekrBwDMM8bzeY=

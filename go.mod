@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.3
 
 require (
-	git.taurusxin.com/taurusxin/ncmdump-go v1.7.3
+	git.taurusxin.com/taurusxin/ncmdump-go v1.7.4
 	github.com/wailsapp/wails/v2 v2.9.2
 )
 
