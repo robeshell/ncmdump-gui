@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -75,7 +74,6 @@ func (cm *ConfigManager) Load() *Preference {
 	var preference *Preference = nil
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&preference)
-	fmt.Println(preference)
 	if err != nil {
 		return nil
 	}
