@@ -146,6 +146,9 @@ export const App = () => {
   }
 
   const selectFiles = () => {
+    if (isProcessing) {
+      return
+    }
     SelectFiles().then(files => {
       for (const file of files) {
         setItems(prev => [...prev, { file, status: 'pending' }])
@@ -234,7 +237,14 @@ export const App = () => {
         <Button onClick={selectFiles} icon={<DocumentAddRegular />}>
           添加文件
         </Button>
-        <Button onClick={() => setItems([])} icon={<DeleteDismissRegular />}>
+        <Button
+          onClick={() => {
+            if (!isProcessing) {
+              setItems([])
+            }
+          }}
+          icon={<DeleteDismissRegular />}
+        >
           清除列表
         </Button>
         <Button
