@@ -40,7 +40,7 @@ import {
 import { Status, Item, SaveTo } from './types'
 import { SelectFiles, SelectFolder, ProcessFiles } from '../wailsjs/go/main/App'
 import { main } from '../wailsjs/go/models'
-import { EventsOn } from '../wailsjs/runtime/runtime'
+import { EventsOn, OnFileDrop } from '../wailsjs/runtime/runtime'
 
 const columnsDef: TableColumnDefinition<Item>[] = [
   createTableColumn<Item>({
@@ -135,7 +135,7 @@ export const App = () => {
       for (const file of files) {
         setItems(prev => [...prev, { file, status: 'pending' }])
       }
-      setTotalFilesNeedToProcess(files.length)
+      setTotalFilesNeedToProcess(prev => prev + files.length)
     })
   }
 
@@ -193,6 +193,14 @@ export const App = () => {
       setIsProcessing(false)
     }
   }, [finishedCount])
+
+  OnFileDrop((_x, _y, paths) => {
+    for (const path of paths) {
+      setItems(prev => [...prev, { file: path, status: 'pending' }])
+    }
+    console.log(paths.length, paths)
+    setTotalFilesNeedToProcess(prev => prev + paths.length)
+  }, false)
 
   return (
     <div className="p-3">
