@@ -43,6 +43,7 @@ import {
 
 import { Status, Item, SaveTo } from './types'
 import { SelectFiles, SelectFolder, ProcessFiles } from '../wailsjs/go/main/App'
+import { Load, Save } from '../wailsjs/go/utils/ConfigManager'
 import { main } from '../wailsjs/go/models'
 import { EventsOn, OnFileDrop } from '../wailsjs/runtime/runtime'
 
@@ -79,10 +80,6 @@ export const App = () => {
   const [items, setItems] = useState<Item[]>([])
   const isProcessing = useMemo(() => {
     return items.some(item => item.status === 'processing')
-  }, [items])
-
-  const isProcessFinished = useMemo(() => {
-    return items.every(item => item.status === 'done' || item.status === 'error')
   }, [items])
 
   const [saveTo, setSaveTo] = useState<SaveTo>('original')
@@ -179,6 +176,10 @@ export const App = () => {
       showDialog('当前文件列表已全部处理完毕，请重新添加新的文件。')
       return
     }
+    if(saveTo === 'custom' && savePath === '') {
+      showDialog('保存路径为空，请先设置保存路径。')
+      return
+    }
     const ncmFiles: main.NcmFile[] = []
     items.forEach(item => {
       ncmFiles.push({
@@ -197,7 +198,19 @@ export const App = () => {
         return newItems
       })
     })
+    Load().then(res => {
+      console.log(res)
+      setSaveTo(res.save_to as SaveTo)
+      setSavePath(res.path)
+    })
   }, [])
+
+  useEffect(() => {
+    Save({
+      save_to: saveTo,
+      path: savePath,
+    }).then(_ => {})
+  }, [saveTo, savePath])
 
   OnFileDrop((_x, _y, paths) => {
     let length = paths.length

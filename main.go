@@ -6,6 +6,8 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+
+	"git.taurusxin.com/taurusxin/ncmdump-gui/utils"
 )
 
 //go:embed all:frontend/dist
@@ -15,8 +17,13 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
+	config_manager, err := utils.NewConfigManager("config.json")
+	if err != nil {
+		return
+	}
+
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:  "ncmdump-gui",
 		Width:  750,
 		Height: 500,
@@ -27,6 +34,7 @@ func main() {
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
+			config_manager,
 		},
 		DragAndDrop: &options.DragAndDrop{
 			EnableFileDrop: true,
