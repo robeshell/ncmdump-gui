@@ -12,6 +12,8 @@ ncmdump-gui 基于 [ncmdump-go](https://git.taurusxin.com/taurusxin/ncmdump-go) 
 
 前往[Releases](https://git.taurusxin.com/taurusxin/ncmdump-gui/releases)下载最新版本。
 
+请注意：绝大多数较新版本的 Windows 都自带了 Webview 2 运行时，如果遇到了软件无法启动的问题，请前往微软官网下载：<https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/>
+
 ## Bug 及建议
 
 如有任何问题或建议，请直接通过 [Issue](https://git.taurusxin.com/taurusxin/ncmdump-gui/issues) 反馈，本站已开放注册。
