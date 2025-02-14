@@ -38,11 +38,12 @@ import {
   DocumentAddRegular,
   DeleteRegular,
   DeleteDismissRegular,
+  FolderAddRegular,
   WindowPlayRegular,
 } from '@fluentui/react-icons'
 
 import { Status, Item, SaveTo } from './types'
-import { SelectFiles, SelectFolder, ProcessFiles } from '../wailsjs/go/main/App'
+import { SelectFiles, SelectFolder, SelectFilesFromFolder, ProcessFiles } from '../wailsjs/go/main/App'
 import { Load, Save } from '../wailsjs/go/utils/ConfigManager'
 import { main } from '../wailsjs/go/models'
 import { EventsOn, OnFileDrop } from '../wailsjs/runtime/runtime'
@@ -155,6 +156,17 @@ export const App = () => {
     })
   }
 
+  const selectFilesFromFolder = () => {
+    if (isProcessing) {
+      return
+    }
+    SelectFilesFromFolder('ncm').then(files => {
+      for (const file of files) {
+        setItems(prev => [...prev, { file, status: 'pending' }])
+      }
+    })
+  }
+
   const showDialog = (message: string) => {
     setMessage(message)
     setOpen(true)
@@ -178,7 +190,7 @@ export const App = () => {
       showDialog('当前文件列表已全部处理完毕，请重新添加新的文件。')
       return
     }
-    if(saveTo === 'custom' && savePath === '') {
+    if (saveTo === 'custom' && savePath === '') {
       showDialog('保存路径为空，请先设置保存路径。')
       return
     }
@@ -254,6 +266,7 @@ export const App = () => {
         <Button onClick={selectFiles} icon={<DocumentAddRegular />}>
           添加文件
         </Button>
+        <Button onClick={selectFilesFromFolder} icon={<FolderAddRegular />}>添加目录</Button>
         <Button
           onClick={() => {
             if (!isProcessing) {

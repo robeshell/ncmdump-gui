@@ -6,6 +6,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"git.taurusxin.com/taurusxin/ncmdump-go/ncmcrypt"
+	"git.taurusxin.com/taurusxin/ncmdump-gui/utils"
 )
 
 // App struct
@@ -49,6 +50,21 @@ func (a *App) SelectFolder() string {
 		return ""
 	}
 	return folder
+}
+
+func (a *App) SelectFilesFromFolder(ext string) []string {
+	folder, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "请选择文件夹",
+	})
+	if err != nil {
+		return []string{}
+	} else {
+		files, err := utils.ListFilesFromFolder(folder, ext)
+		if err != nil {
+			return []string{}
+		}
+		return files
+	}
 }
 
 type Status = string
