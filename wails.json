@@ -13,7 +13,7 @@
   "info": {
     "companyName": "TaurusXin",
     "productName": "ncmdump-gui",
-    "productVersion": "1.2.0",
+    "productVersion": "1.2.1",
     "copyright": "Copyright © 2025 TaurusXin",
     "comments": "Convert ncm to mp3/flac"
   }
