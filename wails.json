@@ -7,14 +7,14 @@
   "frontend:dev:watcher": "pnpm dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "TaurusXin",
-    "email": "i@taurusxin.com"
+    "name": "robeshell",
+    "email": ""
   },
   "info": {
-    "companyName": "TaurusXin",
-    "productName": "ncmdump-gui",
-    "productVersion": "1.2.1",
-    "copyright": "Copyright © 2025 TaurusXin",
-    "comments": "Convert ncm to mp3/flac"
+    "companyName": "robeshell",
+    "productName": "NCM 转换",
+    "productVersion": "2.0.0",
+    "copyright": "Copyright © 2018-present TaurusXin and contributors; modifications © robeshell",
+    "comments": "Convert NetEase NCM to mp3/flac"
   }
 }
