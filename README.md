@@ -11,7 +11,7 @@ macOS 图形化工具：将 `.ncm` 解密为标准 **MP3 / FLAC**，并写入元
 基于 [ncmdump-go](https://git.taurusxin.com/taurusxin/ncmdump-go) / 原 [ncmdump-gui](https://git.taurusxin.com/taurusxin/ncmdump-gui) 改造，界面按 macOS 工具风格重做，并增强批量与目录能力。解密核心仍使用 `ncmcrypt`（MIT）。
 
 **仓库：** [github.com/robeshell/ncmdump-gui](https://github.com/robeshell/ncmdump-gui)  
-**当前版本：** [v2.0.0](https://github.com/robeshell/ncmdump-gui/releases/tag/v2.0.0)
+**当前版本：** [v2.0.1](https://github.com/robeshell/ncmdump-gui/releases/tag/v2.0.1)
 
 ---
 

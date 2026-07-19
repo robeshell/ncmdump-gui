@@ -13,7 +13,7 @@
   "info": {
     "companyName": "robeshell",
     "productName": "NCM 转换",
-    "productVersion": "2.0.0",
+    "productVersion": "2.0.1",
     "copyright": "Copyright © 2018-present TaurusXin and contributors; modifications © robeshell",
     "comments": "Convert NCM to mp3/flac"
   }

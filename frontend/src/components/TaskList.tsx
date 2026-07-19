@@ -17,7 +17,7 @@ export function TaskList({ tasks, onRemove }: Props) {
         <table className="w-full table-fixed text-left">
           <thead className="sticky top-0 z-10 border-b border-black/[0.06] bg-[#FAFAFA] dark:border-white/[0.08] dark:bg-[#1C1C1E]/90">
             <tr className="text-[11px] font-medium text-[#86868B] dark:text-[#98989D]">
-              <th className="w-[5.5rem] px-3 py-2 font-medium">状态</th>
+              <th className="w-20 whitespace-nowrap px-3 py-2 font-medium">状态</th>
               <th className="px-2 py-2 font-medium">文件</th>
               <th className="w-16 px-2 py-2 font-medium">格式</th>
               <th className="w-10 px-1 py-2" />
@@ -41,7 +41,7 @@ export function TaskList({ tasks, onRemove }: Props) {
                   key={task.id}
                   className="border-b border-black/[0.04] last:border-0 hover:bg-black/[0.02] dark:border-white/[0.04] dark:hover:bg-white/[0.03]"
                 >
-                  <td className="px-3 py-2.5 align-middle">
+                  <td className="whitespace-nowrap px-3 py-2.5 align-middle">
                     <StatusBadge status={task.status} />
                   </td>
                   <td className="px-2 py-2.5 align-middle">
