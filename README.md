@@ -1,5 +1,11 @@
 # NCM 转换（ncmdump-gui）
 
+> [!CAUTION]
+> **此应用只用于学习用途，下载后请在 24 小时内删除，禁止用于商业或违法用途！**  
+> 请在遵守 NCM 文件提供平台的服务条款下使用本应用，作者对商业或违法使用本软件造成的任何后果不承担任何责任！  
+>  
+> **使用本软件转换的音频请在不侵犯著作权的前提下使用。如需商业用途，请从平台或版权所有人购买对应歌曲。**
+
 macOS 图形化工具：将网易云音乐的 `.ncm` 解密为标准 **MP3 / FLAC**，并写入元数据、封面与歌词。
 
 基于 [ncmdump-go](https://git.taurusxin.com/taurusxin/ncmdump-go) / 原 [ncmdump-gui](https://git.taurusxin.com/taurusxin/ncmdump-gui) 改造，界面按 macOS 工具风格重做，并增强批量与目录能力。解密核心仍使用 `ncmcrypt`（MIT）。
