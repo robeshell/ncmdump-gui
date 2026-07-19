@@ -122,7 +122,7 @@ export default function App() {
               NCM 转换
             </h1>
             <p className="mt-0.5 text-[12px] text-[#86868B] dark:text-[#98989D]">
-              将网易云 NCM 转为 MP3 / FLAC，并写入元数据
+              将 NCM 转为 MP3 / FLAC，并写入元数据
             </p>
           </div>
           {processing && (

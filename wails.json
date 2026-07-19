@@ -15,6 +15,6 @@
     "productName": "NCM 转换",
     "productVersion": "2.0.0",
     "copyright": "Copyright © 2018-present TaurusXin and contributors; modifications © robeshell",
-    "comments": "Convert NetEase NCM to mp3/flac"
+    "comments": "Convert NCM to mp3/flac"
   }
 }

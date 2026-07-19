@@ -45,7 +45,7 @@ func main() {
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
 				Title:   "NCM 转换",
-				Message: "网易云 NCM 文件转换工具",
+				Message: "NCM 文件转换工具",
 			},
 		},
 	})
