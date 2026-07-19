@@ -15,27 +15,28 @@ import (
 var assets embed.FS
 
 func main() {
-	// Create an instance of the app structure
 	app := NewApp()
 
-	config_manager, err := utils.NewConfigManager("config.json")
+	configManager, err := utils.NewConfigManager("config.json")
 	if err != nil {
+		println("Error: failed to init config:", err.Error())
 		return
 	}
 
-	// Create application with options
 	err = wails.Run(&options.App{
-		Title:  "ncmdump-gui",
-		Width:  750,
-		Height: 500,
+		Title:     "NCM 转换",
+		Width:     920,
+		Height:    640,
+		MinWidth:  720,
+		MinHeight: 480,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		BackgroundColour: &options.RGBA{R: 245, G: 245, B: 247, A: 1},
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
-			config_manager,
+			configManager,
 		},
 		DragAndDrop: &options.DragAndDrop{
 			EnableFileDrop:     true,
@@ -43,8 +44,8 @@ func main() {
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
-				Title:   "ncmdump-gui",
-				Message: "Copyright © 2025 TaurusXin",
+				Title:   "NCM 转换",
+				Message: "网易云 NCM 文件转换工具",
 			},
 		},
 	})

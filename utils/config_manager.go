@@ -13,43 +13,46 @@ const (
 	Custom   SaveToType = "custom"
 )
 
+// Preference stores user settings for the GUI.
 type Preference struct {
-	SaveTo SaveToType  `json:"save_to"`
-	Path   string       `json:"path"`
+	SaveTo      SaveToType `json:"save_to"`
+	Path        string     `json:"path"`
+	FetchCover  bool       `json:"fetch_cover"`
+	EmbedLyrics bool       `json:"embed_lyrics"`
 }
 
+// ConfigManager persists Preference to the user config directory.
 type ConfigManager struct {
 	FilePath string
 }
 
-// NewConfigManager 创建一个新的配置管理器，自动适配不同操作系统的用户目录
+// NewConfigManager creates a config manager under the OS user config dir.
 func NewConfigManager(filename string) (*ConfigManager, error) {
-	configDir, err := os.UserConfigDir() // 获取用户配置目录
+	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return nil, err
 	}
 
 	dirPath := filepath.Join(configDir, "ncmdump-gui")
-	err = os.MkdirAll(dirPath, os.ModePerm)
-	if err != nil {
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
 		return nil, err
 	}
 
 	filePath := filepath.Join(dirPath, filename)
+	cm := &ConfigManager{FilePath: filePath}
 
-	configManager := &ConfigManager{FilePath: filePath}
-	// if not exist, create it with default value
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		defaultConfig := &Preference{
-			SaveTo: Original,
-			Path:   "",
-		}
-		configManager.Save(defaultConfig)
+		_ = cm.Save(&Preference{
+			SaveTo:      Original,
+			Path:        "",
+			FetchCover:  true,
+			EmbedLyrics: true,
+		})
 	}
-	return &ConfigManager{FilePath: filePath}, nil
+	return cm, nil
 }
 
-// Save 将配置保存到文件
+// Save writes preference to disk.
 func (cm *ConfigManager) Save(preference *Preference) bool {
 	file, err := os.Create(cm.FilePath)
 	if err != nil {
@@ -58,24 +61,44 @@ func (cm *ConfigManager) Save(preference *Preference) bool {
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ") // 格式化输出
-	err = encoder.Encode(preference)
-	return err == nil
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(preference) == nil
 }
 
-// Load 从文件读取配置
+// Load reads preference from disk. Missing fetch_cover / embed_lyrics default to true.
 func (cm *ConfigManager) Load() *Preference {
-	file, err := os.Open(cm.FilePath)
+	raw, err := os.ReadFile(cm.FilePath)
 	if err != nil {
-		return nil
+		return defaultPreference()
 	}
-	defer file.Close()
 
-	var preference *Preference = nil
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&preference)
-	if err != nil {
-		return nil
+	var preference Preference
+	if err := json.Unmarshal(raw, &preference); err != nil {
+		return defaultPreference()
 	}
-	return preference
+
+	// Old configs: missing keys default to true.
+	var m map[string]interface{}
+	if json.Unmarshal(raw, &m) == nil {
+		if _, ok := m["fetch_cover"]; !ok {
+			preference.FetchCover = true
+		}
+		if _, ok := m["embed_lyrics"]; !ok {
+			preference.EmbedLyrics = true
+		}
+	}
+
+	if preference.SaveTo == "" {
+		preference.SaveTo = Original
+	}
+	return &preference
+}
+
+func defaultPreference() *Preference {
+	return &Preference{
+		SaveTo:      Original,
+		Path:        "",
+		FetchCover:  true,
+		EmbedLyrics: true,
+	}
 }

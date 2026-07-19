@@ -1,371 +1,169 @@
-import React, { useEffect, useMemo } from 'react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  Button,
-  createTableColumn,
-  Dialog,
-  DialogActions,
-  DialogBody,
-  DialogContent,
-  DialogSurface,
-  DialogTitle,
-  DialogTrigger,
-  Field,
-  Input,
-  Radio,
-  RadioGroup,
-  TableColumnDefinition,
-  TableColumnSizingOptions,
-  useTableColumnSizing_unstable,
-  useTableFeatures,
-} from '@fluentui/react-components'
-import {
-  TableBody,
-  TableCell,
-  TableRow,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableCellLayout,
-  makeStyles,
-  tokens,
-} from '@fluentui/react-components'
-import {
-  ClockRegular,
-  CheckmarkRegular,
-  DismissRegular,
-  DocumentArrowRightRegular,
-  DocumentAddRegular,
-  DeleteRegular,
-  DeleteDismissRegular,
-  FolderAddRegular,
-  WindowPlayRegular,
-} from '@fluentui/react-icons'
+  SelectFiles,
+  SelectFilesFromFolder,
+  SelectFolder,
+} from '../wailsjs/go/main/App'
+import { AlertDialog } from './components/AlertDialog'
+import { DropZone } from './components/DropZone'
+import { FooterStats } from './components/FooterStats'
+import { OptionsBar } from './components/OptionsBar'
+import { TaskList } from './components/TaskList'
+import { Toolbar } from './components/Toolbar'
+import { usePreference } from './hooks/usePreference'
+import { useTasks } from './hooks/useTasks'
+import type { SaveTo } from './types'
 
-import { Status, Item, SaveTo } from './types'
-import { SelectFiles, SelectFolder, SelectFilesFromFolder, ProcessFiles } from '../wailsjs/go/main/App'
-import { Load, Save } from '../wailsjs/go/utils/ConfigManager'
-import { main } from '../wailsjs/go/models'
-import { EventsOn, OnFileDrop } from '../wailsjs/runtime/runtime'
+export default function App() {
+  const {
+    saveTo,
+    setSaveTo,
+    savePath,
+    setSavePath,
+    fetchCover,
+    setFetchCover,
+    embedLyrics,
+    setEmbedLyrics,
+  } = usePreference()
 
-const columnsDef: TableColumnDefinition<Item>[] = [
-  createTableColumn<Item>({
-    columnId: 'status',
-    renderHeaderCell: () => <>状态</>,
-  }),
-  createTableColumn<Item>({
-    columnId: 'file',
-    renderHeaderCell: () => <>文件</>,
-  }),
-  createTableColumn<Item>({
-    columnId: 'operation',
-    renderHeaderCell: () => <>操作</>,
-  }),
-]
+  const {
+    tasks,
+    processing,
+    lastBatch,
+    stats,
+    addPaths,
+    removeTask,
+    clearTasks,
+    startProcess,
+  } = useTasks()
 
-const useStyles = makeStyles({
-  iconGreen: {
-    color: tokens.colorPaletteGreenForeground1,
-  },
-  iconRed: {
-    color: tokens.colorPaletteRedForeground1,
-  },
-  iconYellow: {
-    color: tokens.colorPaletteYellowForeground1,
-  },
-})
-
-let loaded = false
-
-export const App = () => {
-  const styles = useStyles()
-
-  const [items, setItems] = useState<Item[]>([])
-  const isProcessing = useMemo(() => {
-    return items.some(item => item.status === 'processing')
-  }, [items])
-
-  const [saveTo, setSaveTo] = useState<SaveTo>('original')
-  const [savePath, setSavePath] = useState('')
-
-  const [message, setMessage] = useState('')
-  const [open, setOpen] = useState(false)
-
-  const [columns] = React.useState<TableColumnDefinition<Item>[]>(columnsDef)
-  const [columnSizingOptions] = React.useState<TableColumnSizingOptions>({
-    status: {
-      idealWidth: 100,
-      minWidth: 100,
-    },
-    file: {
-      idealWidth: 1000,
-      minWidth: 150,
-    },
-    operation: {
-      idealWidth: 80,
-      minWidth: 80,
-    },
+  const [dialog, setDialog] = useState<{ open: boolean; message: string }>({
+    open: false,
+    message: '',
   })
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { getRows, columnSizing_unstable, tableRef } = useTableFeatures(
-    {
-      columns,
-      items,
-    },
-    [useTableColumnSizing_unstable({ columnSizingOptions })]
-  )
+  const showDialog = (message: string) => setDialog({ open: true, message })
 
-  // return the icon based on the status
-  const statusMapIcon = (status: Status) => {
-    switch (status) {
-      case 'pending':
-        return <ClockRegular />
-      case 'processing':
-        return <DocumentArrowRightRegular className={styles.iconYellow} />
-      case 'done':
-        return <CheckmarkRegular className={styles.iconGreen} />
-      case 'error':
-        return <DismissRegular className={styles.iconRed} />
-      default:
+  const batchHint = useMemo(() => {
+    if (!lastBatch || processing) return null
+    if (lastBatch.total === 0) return null
+    return `上次：完成 ${lastBatch.done}，失败 ${lastBatch.error}`
+  }, [lastBatch, processing])
+
+  const handleAddFiles = async () => {
+    if (processing) return
+    const files = await SelectFiles()
+    if (files?.length) addPaths(files)
+  }
+
+  const handleAddFolder = async () => {
+    if (processing) return
+    const selection = await SelectFilesFromFolder()
+    if (selection?.files?.length) {
+      addPaths(selection.files, selection.root || undefined)
     }
   }
 
-  // return the text based on the status
-  const statusMapText = (status: Status) => {
-    switch (status) {
-      case 'pending':
-        return '等待'
-      case 'processing':
-        return '处理'
-      case 'done':
-        return '完成'
-      case 'error':
-        return '错误'
+  const handlePickSaveFolder = async () => {
+    if (processing) return
+    const folder = await SelectFolder()
+    if (folder) {
+      setSaveTo('custom')
+      setSavePath(folder)
     }
   }
 
-  const selectFiles = () => {
-    if (isProcessing) {
+  const handleSaveToChange = (v: SaveTo) => {
+    setSaveTo(v)
+    if (v === 'original') setSavePath('')
+  }
+
+  const handleStart = async () => {
+    if (tasks.length === 0) {
+      showDialog('当前列表为空，请先添加 .ncm 文件。')
       return
     }
-    SelectFiles().then(files => {
-      for (const file of files) {
-        setItems(prev => [...prev, { file, status: 'pending' }])
-      }
-    })
-  }
-
-  const selectFilesFromFolder = () => {
-    if (isProcessing) {
+    if (stats.pending === 0) {
+      showDialog('没有待处理的文件。请添加新文件，或移除后重新添加失败项。')
       return
     }
-    SelectFilesFromFolder('ncm').then(files => {
-      for (const file of files) {
-        setItems(prev => [...prev, { file, status: 'pending' }])
-      }
-    })
-  }
-
-  const showDialog = (message: string) => {
-    setMessage(message)
-    setOpen(true)
-  }
-
-  const startProcess = async () => {
-    // 未添加文件时
-    if (items.length === 0) {
-      showDialog('当前文件列表为空，请先添加文件。')
+    if (saveTo === 'custom' && !savePath) {
+      showDialog('请先选择自定义保存目录。')
       return
     }
-    // 检查所有文件是否都已处理完毕
-    let isAllFinished = true
-    for (const item of items) {
-      if (item.status === 'pending') {
-        isAllFinished = false
-        break
-      }
-    }
-    if (isAllFinished) {
-      showDialog('当前文件列表已全部处理完毕，请重新添加新的文件。')
-      return
-    }
-    if (saveTo === 'custom' && savePath === '') {
-      showDialog('保存路径为空，请先设置保存路径。')
-      return
-    }
-    const ncmFiles: main.NcmFile[] = []
-    items.forEach(item => {
-      ncmFiles.push({
-        Name: item.file,
-        Status: item.status,
-      })
+
+    const result = await startProcess({
+      savePath: saveTo === 'custom' ? savePath : '',
+      fetchCover,
+      embedLyrics,
+      concurrency: 0,
     })
-    ProcessFiles(ncmFiles, savePath).then(() => {})
+
+    if (!result.ok) {
+      if (result.reason === 'busy') showDialog('已有任务在处理中，请稍候。')
+      else if (result.reason === 'no_pending') showDialog('没有待处理的文件。')
+      else showDialog('启动转换失败，请重试。')
+    }
   }
-
-  useEffect(() => {
-    EventsOn('file-status-changed', (index: number, status: Status) => {
-      setItems(prev => {
-        const newItems = [...prev]
-        newItems[index].status = status
-        return newItems
-      })
-    })
-    Load().then(res => {
-      setSaveTo(res.save_to as SaveTo)
-      setSavePath(res.path)
-      loaded = true
-    })
-  }, [])
-
-  useEffect(() => {
-    if (loaded) {
-      Save({
-        save_to: saveTo,
-        path: savePath,
-      }).then(_ => {})
-    }
-  }, [saveTo, savePath])
-
-  OnFileDrop((_x, _y, paths) => {
-    let length = paths.length
-    for (const path of paths) {
-      // only end with ncm
-      if (!path.endsWith('.ncm')) {
-        length--
-        continue
-      }
-      setItems(prev => [...prev, { file: path, status: 'pending' }])
-    }
-  }, false)
 
   return (
-    <div className="p-3">
-      <Dialog
-        // this controls the dialog open state
-        open={open}
-        onOpenChange={(event, data) => {
-          // it is the users responsibility to react accordingly to the open state change
-          setOpen(data.open)
-        }}
-      >
-        <DialogSurface style={{ width: '400px' }}>
-          <DialogBody>
-            <DialogTitle>警告</DialogTitle>
-            <DialogContent>{message}</DialogContent>
-            <DialogActions>
-              <DialogTrigger disableButtonEnhancement>
-                <Button appearance="primary">关闭</Button>
-              </DialogTrigger>
-            </DialogActions>
-          </DialogBody>
-        </DialogSurface>
-      </Dialog>
-      <div className="flex space-between gap-3">
-        <Button onClick={selectFiles} icon={<DocumentAddRegular />}>
-          添加文件
-        </Button>
-        <Button onClick={selectFilesFromFolder} icon={<FolderAddRegular />}>添加目录</Button>
-        <Button
-          onClick={() => {
-            if (!isProcessing) {
-              setItems([])
-            }
-          }}
-          icon={<DeleteDismissRegular />}
-        >
-          清除列表
-        </Button>
-        <Button
-          appearance="primary"
-          icon={<WindowPlayRegular />}
-          onClick={() => {
-            startProcess()
-          }}
-          disabled={isProcessing}
-        >
-          {isProcessing ? '处理中...' : '开始处理'}
-        </Button>
+    <div className="flex h-screen flex-col bg-[#F5F5F7] text-[#1D1D1F] dark:bg-[#1C1C1E] dark:text-[#F5F5F7]">
+      <AlertDialog
+        open={dialog.open}
+        message={dialog.message}
+        onClose={() => setDialog(d => ({ ...d, open: false }))}
+      />
+
+      {/* Title area — compact, no decorative logo glow */}
+      <header className="shrink-0 px-5 pt-4 pb-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-[17px] font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
+              NCM 转换
+            </h1>
+            <p className="mt-0.5 text-[12px] text-[#86868B] dark:text-[#98989D]">
+              将网易云 NCM 转为 MP3 / FLAC，并写入元数据
+            </p>
+          </div>
+          {processing && (
+            <span className="text-[12px] font-medium text-[#0071E3]">转换中…</span>
+          )}
+        </div>
+      </header>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-5 pb-4">
+        <Toolbar
+          processing={processing}
+          onAddFiles={handleAddFiles}
+          onAddFolder={handleAddFolder}
+          onClear={clearTasks}
+          onStart={handleStart}
+        />
+
+        <OptionsBar
+          saveTo={saveTo}
+          savePath={savePath}
+          fetchCover={fetchCover}
+          embedLyrics={embedLyrics}
+          disabled={processing}
+          onSaveToChange={handleSaveToChange}
+          onPickFolder={handlePickSaveFolder}
+          onFetchCoverChange={setFetchCover}
+          onEmbedLyricsChange={setEmbedLyrics}
+        />
+
+        {/* Primary work area */}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <DropZone
+            visible={tasks.length === 0}
+            disabled={processing}
+            onClickAdd={handleAddFiles}
+          />
+          <TaskList tasks={tasks} onRemove={removeTask} />
+        </div>
+
+        <FooterStats stats={stats} batchHint={batchHint} />
       </div>
-      <div className="mt-3">
-        <Field label="保存转换后的文件到">
-          <RadioGroup
-            layout="horizontal"
-            value={saveTo}
-            onChange={(_, data) => {
-              setSaveTo(data.value as SaveTo)
-              if (data.value === 'original') {
-                setSavePath('')
-              }
-            }}
-          >
-            <Radio value="original" label="源文件所在目录" />
-            <Radio value="custom" label="自定义保存目录" />
-            {saveTo === 'custom' && (
-              <Input
-                placeholder="点击来选择保存目录"
-                value={savePath}
-                readOnly
-                style={{ flexGrow: 1 }}
-                onClick={() => {
-                  SelectFolder().then(path => {
-                    if (path) {
-                      setSavePath(path)
-                    }
-                  })
-                }}
-              />
-            )}
-          </RadioGroup>
-        </Field>
-      </div>
-      <Table
-        ref={tableRef}
-        arial-label="Default table"
-        style={{ minWidth: '510px' }}
-        size="small"
-        className="mt-3"
-      >
-        <TableHeader>
-          <TableRow>
-            {columns.map(column => (
-              <TableHeaderCell
-                key={column.columnId}
-                {...columnSizing_unstable.getTableHeaderCellProps(column.columnId)}
-              >
-                {column.renderHeaderCell()}
-              </TableHeaderCell>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((file, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <TableCellLayout media={statusMapIcon(file.status)}>
-                  {statusMapText(file.status)}
-                </TableCellLayout>
-              </TableCell>
-              <TableCell>{file.file}</TableCell>
-              <TableCell>
-                <Button
-                  size="small"
-                  icon={<DeleteRegular />}
-                  appearance="transparent"
-                  onClick={() => {
-                    setItems(prev => prev.filter((_, i) => i !== index))
-                  }}
-                >
-                  移除
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   )
 }
-
-export default App
